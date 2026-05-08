@@ -79,3 +79,11 @@ docker run cloudflare/cloudflared:latest tunnel --no-autoupdate run --token xxxx
 Add a public hostname
 <img width="944" height="482" alt="image" src="https://github.com/user-attachments/assets/3de14515-4ada-41eb-96ec-c5489ef2b362" />
 
+# Kết Quả
+## Trang Admin Django
+<img width="956" height="511" alt="image" src="https://github.com/user-attachments/assets/6796baf9-f525-4364-b4ca-8dc374b4cc1a" />
+
+## Trang Con Nợ Đến Hạn
+<img width="954" height="476" alt="image" src="https://github.com/user-attachments/assets/9ca32409-c7f8-4b7d-960d-8ec399b6e899" />
+
+
