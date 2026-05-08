@@ -84,6 +84,6 @@ Add a public hostname
 <img width="956" height="511" alt="image" src="https://github.com/user-attachments/assets/6796baf9-f525-4364-b4ca-8dc374b4cc1a" />
 
 ## Trang Con Nợ Đến Hạn
-<img width="954" height="476" alt="image" src="https://github.com/user-attachments/assets/9ca32409-c7f8-4b7d-960d-8ec399b6e899" />
+<img width="952" height="474" alt="image" src="https://github.com/user-attachments/assets/f0a7792a-089b-4951-9b2c-276498e5923d" />
 
 
