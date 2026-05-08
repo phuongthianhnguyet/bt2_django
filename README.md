@@ -37,3 +37,45 @@ http://192.168.126.131:8000/admin/ → trang quản trị
 
 
 
+# Cloudflared
+Mở file:
+```
+docker-compose.yml
+```
+Thêm đoạn sau vào phần services::
+```yml
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: camdo_cloudflared
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TOKEN}
+    restart: unless-stopped
+    depends_on:
+      - django
+    networks:
+      - camdo_net
+```
+## Thêm Token Cloudflare
+Mở file: `.env`
+Thêm:
+```
+CLOUDFLARE_TOKEN=eyJggoi...
+```
+## Lấy Tunnel Token Trên Cloudflare
+Bước 1: Truy cập Cloudflare 
+Bước 2: Tạo Tunnel
+Chọn:
+Create a Tunnel
+
+<img width="957" height="485" alt="image" src="https://github.com/user-attachments/assets/c66e5220-21e1-4cdc-b4c8-f5b12cc45536" />
+
+Bước 3: Chọn Docker
+Cloudflare sẽ hiện lệnh dạng:
+
+docker run cloudflare/cloudflared:latest tunnel --no-autoupdate run --token xxxxx
+
+<img width="945" height="474" alt="image" src="https://github.com/user-attachments/assets/c170f7b0-9927-4f1e-9a14-12030517f36d" />
+
+## Tạo Public Hostname
+Add a public hostname
+<img width="944" height="482" alt="image" src="https://github.com/user-attachments/assets/3de14515-4ada-41eb-96ec-c5489ef2b362" />
+
