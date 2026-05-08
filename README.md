@@ -1,3 +1,36 @@
+
+# Cấu trúc dự án Django Cầm Đồ
+
+```
+django-camdo/
+├── docker-compose.yml
+├── .env
+├── README.md
+└── django/
+    ├── Dockerfile
+    ├── requirements.txt
+    └── web/
+        ├── manage.py
+        ├── staticfiles/
+        ├── config/
+        │   ├── __init__.py
+        │   ├── asgi.py
+        │   ├── settings.py
+        │   ├── urls.py
+        │   └── wsgi.py
+        └── core/
+            ├── __init__.py
+            ├── admin.py
+            ├── apps.py
+            ├── models.py
+            ├── tests.py
+            ├── urls.py
+            ├── views.py
+            ├── migrations/
+            └── template/
+                └── home.html
+```
+
 Chạy lần lượt từng lệnh:  
 Bước 1 — Tạo migration:  
 ```bash
@@ -85,5 +118,6 @@ Add a public hostname
 
 ## Trang Con Nợ Đến Hạn
 <img width="952" height="474" alt="image" src="https://github.com/user-attachments/assets/f0a7792a-089b-4951-9b2c-276498e5923d" />
-
+## Trang con nợ đến hạn khi đã cho thêm khách hàng.
+<img width="1905" height="949" alt="image" src="https://github.com/user-attachments/assets/9a8e5fcd-beee-49b9-853a-b40a7c14163f" />
 
