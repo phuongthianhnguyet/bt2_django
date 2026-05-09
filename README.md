@@ -30,6 +30,64 @@ django-camdo/
             └── template/
                 └── home.html
 ```
+# 2. Thiết kế CSDL:
+
+<img width="2562" height="1740" alt="image" src="https://github.com/user-attachments/assets/ca257635-531a-4fd3-a177-aa992dbcdfc0" />
+
+## Giải thích
+- Một hợp đồng có nhiều lịch sử thanh toán
+- Một hợp đồng có nhiều tài sản
+- Một khách có nhiều hợp đồng
+
+# 2.1. Mô tả chi tiết từng bảng
+#### KhachHang
+| Trường | Kiểu | Ghi chú |
+|--------|------|---------|
+| id | bigint | PK, auto increment |
+| ho_ten | varchar(100) | Họ tên khách |
+| cmnd | varchar(20) | CMND/CCCD, unique |
+| so_dien_thoai | varchar(15) | |
+| dia_chi | text | |
+
+#### HopDong
+| Trường | Kiểu | Ghi chú |
+|--------|------|---------|
+| id | bigint | PK |
+| ma_hop_dong | varchar(20) | unique |
+| khach_hang_id | bigint | FK → KhachHang |
+| nhan_vien_lap | varchar(100) | |
+| ngay_cam | date | |
+| ngay_dao_han | date | |
+| so_tien_vay | decimal(15,0) | VNĐ |
+| lai_suat | decimal(5,2) | %/tháng |
+| trang_thai | varchar(20) | dang_cam / da_chuoc / qua_han |
+| ghi_chu | text | |
+
+#### TaiSan
+| Trường | Kiểu | Ghi chú |
+|--------|------|---------|
+| id | bigint | PK |
+| hop_dong_id | bigint | FK → HopDong |
+| ten_tai_san | varchar(200) | |
+| danh_muc | varchar(20) | vang / dien_tu / xe / do_dung / khac |
+| mo_ta | text | |
+| gia_dinh_gia | decimal(15,0) | VNĐ |
+| hinh_anh | varchar(100) | đường dẫn file |
+
+#### LichSuTT
+| Trường | Kiểu | Ghi chú |
+|--------|------|---------|
+| id | bigint | PK |
+| hop_dong_id | bigint | FK → HopDong |
+| ngay_tt | date | |
+| so_tien | decimal(15,0) | VNĐ |
+| loai | varchar(20) | thanh_toan / gia_han / phat_lai |
+| ghi_chu | text | |
+
+### Quan hệ
+- **KhachHang (1 : n) → HopDong**: một khách có nhiều hợp đồng
+- **HopDong (1 : n) → TaiSan**: một hợp đồng có nhiều tài sản
+- **HopDong (1 : n) → LichSuTT**: một hợp đồng có nhiều lịch sử thanh toán
 
 Chạy lần lượt từng lệnh:  
 Bước 1 — Tạo migration:  
