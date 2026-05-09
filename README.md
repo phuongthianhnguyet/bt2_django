@@ -1,76 +1,54 @@
+# 🏦 Quản lý Tiệm Cầm Đồ
 
-# 1. Giới thiệu:
-# 2. Thiết kế CSDL:
+> Ứng dụng web quản lý nghiệp vụ tiệm cầm đồ, xây dựng trên **Django (Python)**,
+> triển khai hoàn toàn bằng **Docker Compose**, public ra Internet qua **Cloudflare Tunnel**.
 
-<img width="2562" height="1740" alt="image" src="https://github.com/user-attachments/assets/ca257635-531a-4fd3-a177-aa992dbcdfc0" />
+---
 
-## Giải thích
-- Một hợp đồng có nhiều lịch sử thanh toán
-- Một hợp đồng có nhiều tài sản
-- Một khách có nhiều hợp đồng
+## 1. Tính năng nổi bật
 
-# 3. Mô tả chi tiết từng bảng
-#### KhachHang
-| Trường | Kiểu | Ghi chú |
-|--------|------|---------|
-| id | bigint | PK, auto increment |
-| ho_ten | varchar(100) | Họ tên khách |
-| cmnd | varchar(20) | CMND/CCCD, unique |
-| so_dien_thoai | varchar(15) | |
-| dia_chi | text | |
+- 📋 Quản lý **Khách hàng · Hợp đồng · Tài sản · Lịch sử thanh toán**
+- ⚙️ Trang `/admin` tự sinh bởi Django — thêm / sửa / xoá mọi bảng, khoá ngoại hiển thị **dropdown** thay vì nhập ID thủ công
+- 🔴 Trang chủ `/` tự động liệt kê **hợp đồng đến hạn chưa chuộc** (template Jinja2 + context từ view)
+- 🔍 Kiểm chứng FK lưu ID số nguyên trực tiếp qua **phpMyAdmin**
+- 🌐 Truy cập từ Internet qua subdomain Cloudflare — không cần mở port, không cần IP tĩnh
 
-#### HopDong
-| Trường | Kiểu | Ghi chú |
-|--------|------|---------|
-| id | bigint | PK |
-| ma_hop_dong | varchar(20) | unique |
-| khach_hang_id | bigint | FK → KhachHang |
-| nhan_vien_lap | varchar(100) | |
-| ngay_cam | date | |
-| ngay_dao_han | date | |
-| so_tien_vay | decimal(15,0) | VNĐ |
-| lai_suat | decimal(5,2) | %/tháng |
-| trang_thai | varchar(20) | dang_cam / da_chuoc / qua_han |
-| ghi_chu | text | |
+---
 
-#### TaiSan
-| Trường | Kiểu | Ghi chú |
-|--------|------|---------|
-| id | bigint | PK |
-| hop_dong_id | bigint | FK → HopDong |
-| ten_tai_san | varchar(200) | |
-| danh_muc | varchar(20) | vang / dien_tu / xe / do_dung / khac |
-| mo_ta | text | |
-| gia_dinh_gia | decimal(15,0) | VNĐ |
-| hinh_anh | varchar(100) | đường dẫn file |
+## 2. Công nghệ sử dụng
 
-#### LichSuTT
-| Trường | Kiểu | Ghi chú |
-|--------|------|---------|
-| id | bigint | PK |
-| hop_dong_id | bigint | FK → HopDong |
-| ngay_tt | date | |
-| so_tien | decimal(15,0) | VNĐ |
-| loai | varchar(20) | thanh_toan / gia_han / phat_lai |
-| ghi_chu | text | |
+| Thành phần | Chi tiết |
+|---|---|
+| Backend | Django 4.2 · Python 3.11 |
+| Database | MariaDB 10.11 · mysqlclient driver |
+| Container | Docker Compose · Dockerfile tự build |
+| Tunnel | Cloudflare Zero Trust |
+| Editor | VS Code Remote SSH · `sudo nano` |
 
-### Quan hệ
-- **KhachHang (1 : n) → HopDong**: một khách có nhiều hợp đồng
-- **HopDong (1 : n) → TaiSan**: một hợp đồng có nhiều tài sản
-- **HopDong (1 : n) → LichSuTT**: một hợp đồng có nhiều lịch sử thanh toán
-  
-## Quan hệ khoá ngoại
+---
 
-| Bảng con | Cột FK | Tham chiếu đến | Kiểu quan hệ |
-|----------|--------|----------------|--------------|
-| `HopDong` | `khach_hang_id` | `KhachHang.id` | 1 KhachHang → n HopDong |
-| `TaiSan` | `hop_dong_id` | `HopDong.id` | 1 HopDong → n TaiSan |
-| `LichSuTT` | `hop_dong_id` | `HopDong.id` | 1 HopDong → n LichSuTT |
+## 3. Kiến trúc triển khai
 
-> Khi thêm dữ liệu vào bảng con (HopDong, TaiSan, LichSuTT),
-> Django tự động lưu ID số nguyên vào cột FK thay vì lưu text —
-> có thể kiểm chứng bằng phpMyAdmin.
-# 4. Cấu trúc dự án Django Cầm Đồ
+```
+[Browser] ──HTTPS──▶ [Cloudflare] ──tunnel──▶ [cloudflared]
+                                                     │
+                                                     ▼
+                                              [Django :8000]
+                                                     │ ORM
+                                                     ▼
+                                           [MariaDB :3306] ◀── [phpMyAdmin :8088]
+```
+
+| Container | Vai trò | Port |
+|---|---|---|
+| `camdo_django` | Ứng dụng web chính | 8000 |
+| `camdo_mariadb` | Cơ sở dữ liệu | 3306 |
+| `camdo_phpmyadmin` | Giao diện kiểm tra CSDL | 8088 |
+| `camdo_cloudflared` | Tunnel ra Internet | — |
+
+---
+
+## 4. Cấu trúc dự án
 
 ```
 django-camdo/
@@ -82,111 +60,185 @@ django-camdo/
     ├── requirements.txt
     └── web/
         ├── manage.py
-        ├── staticfiles/
         ├── config/
-        │   ├── __init__.py
-        │   ├── asgi.py
         │   ├── settings.py
-        │   ├── urls.py
-        │   └── wsgi.py
+        │   └── urls.py
         └── core/
-            ├── __init__.py
-            ├── admin.py
-            ├── apps.py
             ├── models.py
-            ├── tests.py
-            ├── urls.py
+            ├── admin.py
             ├── views.py
+            ├── urls.py
             ├── migrations/
             └── template/
                 └── home.html
 ```
-# 5. Hướng dẫn cài đặt
-Chạy lần lượt từng lệnh:  
-Bước 1 — Tạo migration:  
-```bash
-docker compose exec django python manage.py makemigrations core  
-```
-<img width="598" height="116" alt="image" src="https://github.com/user-attachments/assets/9438e544-b5af-433a-a1cb-643d6b9d8ae9" />
 
-Bước 2 — Áp vào database:  
+---
+
+## 5. Thiết kế CSDL
+
+<img src="https://github.com/user-attachments/assets/ca257635-531a-4fd3-a177-aa992dbcdfc0"/>
+
+### 5.1 Mô tả các bảng
+
+<details>
+<summary>KhachHang</summary>
+
+| Trường | Kiểu | Ghi chú |
+|---|---|---|
+| id | bigint | PK, auto increment |
+| ho_ten | varchar(100) | |
+| cmnd | varchar(20) | unique |
+| so_dien_thoai | varchar(15) | |
+| dia_chi | text | |
+
+</details>
+
+<details>
+<summary>HopDong</summary>
+
+| Trường | Kiểu | Ghi chú |
+|---|---|---|
+| id | bigint | PK |
+| ma_hop_dong | varchar(20) | unique |
+| khach_hang_id | bigint | **FK → KhachHang** |
+| nhan_vien_lap | varchar(100) | |
+| ngay_cam | date | |
+| ngay_dao_han | date | |
+| so_tien_vay | decimal(15,0) | VNĐ |
+| lai_suat | decimal(5,2) | %/tháng |
+| trang_thai | varchar(20) | `dang_cam` / `da_chuoc` / `qua_han` |
+| ghi_chu | text | |
+
+</details>
+
+<details>
+<summary>TaiSan</summary>
+
+| Trường | Kiểu | Ghi chú |
+|---|---|---|
+| id | bigint | PK |
+| hop_dong_id | bigint | **FK → HopDong** |
+| ten_tai_san | varchar(200) | |
+| danh_muc | varchar(20) | `vang` / `dien_tu` / `xe` / `do_dung` / `khac` |
+| mo_ta | text | |
+| gia_dinh_gia | decimal(15,0) | VNĐ |
+| hinh_anh | varchar(100) | đường dẫn file |
+
+</details>
+
+<details>
+<summary>LichSuTT</summary>
+
+| Trường | Kiểu | Ghi chú |
+|---|---|---|
+| id | bigint | PK |
+| hop_dong_id | bigint | **FK → HopDong** |
+| ngay_tt | date | |
+| so_tien | decimal(15,0) | VNĐ |
+| loai | varchar(20) | `thanh_toan` / `gia_han` / `phat_lai` |
+| ghi_chu | text | |
+
+</details>
+
+### 5.2 Quan hệ khoá ngoại
+
+| Bảng con | Cột FK | Tham chiếu | Quan hệ |
+|---|---|---|---|
+| `HopDong` | `khach_hang_id` | `KhachHang.id` | 1 → n |
+| `TaiSan` | `hop_dong_id` | `HopDong.id` | 1 → n |
+| `LichSuTT` | `hop_dong_id` | `HopDong.id` | 1 → n |
+
+> Django lưu **ID số nguyên** vào cột FK, hiển thị text trên form —
+> kiểm chứng bằng phpMyAdmin tại `:8088`
+
+---
+
+## 6. Hướng dẫn cài đặt
+
+### 6.1 Chạy migration & tạo admin
+
+**Bước 1 — Tạo migration từ models.py**
+```bash
+docker compose exec django python manage.py makemigrations core
+```
+<img src="https://github.com/user-attachments/assets/9438e544-b5af-433a-a1cb-643d6b9d8ae9"/>
+
+**Bước 2 — Áp migration vào database**
 ```bash
 docker compose exec django python manage.py migrate
-``` 
-<img width="544" height="95" alt="image" src="https://github.com/user-attachments/assets/c69101a3-ddbc-41f1-b9ab-cd4990651060" />
+```
+<img src="https://github.com/user-attachments/assets/c69101a3-ddbc-41f1-b9ab-cd4990651060"/>
 
-Bước 3 — Tạo tài khoản admin:  
+**Bước 3 — Tạo tài khoản admin**
 ```bash
 docker compose exec django python manage.py createsuperuser
 ```
-
-Nó sẽ hỏi lần lượt: 
 ```
-Username: admin  
-Email address: (enter để bỏ qua)
+Username: admin
+Email address:        ← Enter bỏ qua
 Password: ****
 Password (again): ****
 ```
-<img width="555" height="131" alt="image" src="https://github.com/user-attachments/assets/d0c7c6d6-1953-4ff2-85a9-ccfd78bcfc37" />
+<img src="https://github.com/user-attachments/assets/d0c7c6d6-1953-4ff2-85a9-ccfd78bcfc37"/>
 
-Bước 4 — Kiểm tra kết quả:
-Mở trình duyệt vào:
-```bash
-http://192.168.126.131:8000 → trang con nợ
-http://192.168.126.131:8000/admin/ → trang quản trị
+**Bước 4 — Truy cập**
+
+| URL | Mô tả |
+|---|---|
+| `http://192.168.126.131:8000` | Trang con nợ đến hạn |
+| `http://192.168.126.131:8000/admin/` | Trang quản trị Django |
+| `http://192.168.126.131:8088` | phpMyAdmin |
+
+<img src="https://github.com/user-attachments/assets/9fbc4755-b0a5-434e-9afe-f65ab863ffb5"/>
+<img src="https://github.com/user-attachments/assets/03110193-0e9d-4261-93f9-840afb4a3f37"/>
+
+---
+
+### 6.2 Cấu hình Cloudflare Tunnel
+
+**Bước 1 — Thêm service vào `docker-compose.yml`**
+```yaml
+cloudflared:
+  image: cloudflare/cloudflared:latest
+  container_name: camdo_cloudflared
+  command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TOKEN}
+  restart: unless-stopped
+  depends_on:
+    - django
+  networks:
+    - camdo_net
 ```
-<img width="950" height="434" alt="image" src="https://github.com/user-attachments/assets/9fbc4755-b0a5-434e-9afe-f65ab863ffb5" />
 
-<img width="943" height="472" alt="image" src="https://github.com/user-attachments/assets/03110193-0e9d-4261-93f9-840afb4a3f37" />
-  
-# Cloudflared
-Mở file:
+**Bước 2 — Thêm token vào `.env`**
 ```
-docker-compose.yml
+CLOUDFLARE_TOKEN=eyJh...token_của_bạn
 ```
-Thêm đoạn sau vào phần services::
-```yml
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: camdo_cloudflared
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TOKEN}
-    restart: unless-stopped
-    depends_on:
-      - django
-    networks:
-      - camdo_net
-```
-## Thêm Token Cloudflare
-Mở file: `.env`
-Thêm:
-```
-CLOUDFLARE_TOKEN=eyJggoi...
-```
-## Lấy Tunnel Token Trên Cloudflare
-Bước 1: Truy cập Cloudflare 
-Bước 2: Tạo Tunnel
-Chọn:
-Create a Tunnel
 
-<img width="957" height="485" alt="image" src="https://github.com/user-attachments/assets/c66e5220-21e1-4cdc-b4c8-f5b12cc45536" />
+**Bước 3 — Lấy token trên Cloudflare**
 
-Bước 3: Chọn Docker
-Cloudflare sẽ hiện lệnh dạng:
+1. Vào [one.dash.cloudflare.com](https://one.dash.cloudflare.com) → **Networks → Tunnels**
+2. Chọn **Create a Tunnel → Docker**
+3. Copy token từ lệnh hiển thị → paste vào `.env`
 
-docker run cloudflare/cloudflared:latest tunnel --no-autoupdate run --token xxxxx
+<img src="https://github.com/user-attachments/assets/c66e5220-21e1-4cdc-b4c8-f5b12cc45536"/>
+<img src="https://github.com/user-attachments/assets/c170f7b0-9927-4f1e-9a14-12030517f36d"/>
 
-<img width="945" height="474" alt="image" src="https://github.com/user-attachments/assets/c170f7b0-9927-4f1e-9a14-12030517f36d" />
+**Bước 4 — Thêm Public Hostname**
 
-## Tạo Public Hostname
-Add a public hostname
-<img width="944" height="482" alt="image" src="https://github.com/user-attachments/assets/3de14515-4ada-41eb-96ec-c5489ef2b362" />
+Chọn **Add a public hostname** → trỏ về `http://django:8000`
 
-# Kết Quả
-## Trang Admin Django
-<img width="956" height="511" alt="image" src="https://github.com/user-attachments/assets/6796baf9-f525-4364-b4ca-8dc374b4cc1a" />
+<img src="https://github.com/user-attachments/assets/3de14515-4ada-41eb-96ec-c5489ef2b362"/>
 
-## Trang Con Nợ Đến Hạn
-<img width="952" height="474" alt="image" src="https://github.com/user-attachments/assets/f0a7792a-089b-4951-9b2c-276498e5923d" />
-## Trang con nợ đến hạn khi đã cho thêm khách hàng.
-<img width="1905" height="949" alt="image" src="https://github.com/user-attachments/assets/9a8e5fcd-beee-49b9-853a-b40a7c14163f" />
+---
 
+## 7. Kết quả
+
+### 7.1 Trang Admin Django
+<img src="https://github.com/user-attachments/assets/6796baf9-f525-4364-b4ca-8dc374b4cc1a"/>
+
+### 7.2 Trang con nợ đến hạn
+<img src="https://github.com/user-attachments/assets/f0a7792a-089b-4951-9b2c-276498e5923d"/>
+
+### 7.3 Trang con nợ sau khi thêm đủ dữ liệu
+<img src="https://github.com/user-attachments/assets/9a8e5fcd-beee-49b9-853a-b40a7c14163f"/>
