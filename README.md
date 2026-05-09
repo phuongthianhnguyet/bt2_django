@@ -1,35 +1,5 @@
 
-# Cấu trúc dự án Django Cầm Đồ
-
-```
-django-camdo/
-├── docker-compose.yml
-├── .env
-├── README.md
-└── django/
-    ├── Dockerfile
-    ├── requirements.txt
-    └── web/
-        ├── manage.py
-        ├── staticfiles/
-        ├── config/
-        │   ├── __init__.py
-        │   ├── asgi.py
-        │   ├── settings.py
-        │   ├── urls.py
-        │   └── wsgi.py
-        └── core/
-            ├── __init__.py
-            ├── admin.py
-            ├── apps.py
-            ├── models.py
-            ├── tests.py
-            ├── urls.py
-            ├── views.py
-            ├── migrations/
-            └── template/
-                └── home.html
-```
+# 1. Giới thiệu:
 # 2. Thiết kế CSDL:
 
 <img width="2562" height="1740" alt="image" src="https://github.com/user-attachments/assets/ca257635-531a-4fd3-a177-aa992dbcdfc0" />
@@ -39,7 +9,7 @@ django-camdo/
 - Một hợp đồng có nhiều tài sản
 - Một khách có nhiều hợp đồng
 
-# 2.1. Mô tả chi tiết từng bảng
+# 3. Mô tả chi tiết từng bảng
 #### KhachHang
 | Trường | Kiểu | Ghi chú |
 |--------|------|---------|
@@ -88,7 +58,50 @@ django-camdo/
 - **KhachHang (1 : n) → HopDong**: một khách có nhiều hợp đồng
 - **HopDong (1 : n) → TaiSan**: một hợp đồng có nhiều tài sản
 - **HopDong (1 : n) → LichSuTT**: một hợp đồng có nhiều lịch sử thanh toán
+  
+## Quan hệ khoá ngoại
 
+| Bảng con | Cột FK | Tham chiếu đến | Kiểu quan hệ |
+|----------|--------|----------------|--------------|
+| `HopDong` | `khach_hang_id` | `KhachHang.id` | 1 KhachHang → n HopDong |
+| `TaiSan` | `hop_dong_id` | `HopDong.id` | 1 HopDong → n TaiSan |
+| `LichSuTT` | `hop_dong_id` | `HopDong.id` | 1 HopDong → n LichSuTT |
+
+> Khi thêm dữ liệu vào bảng con (HopDong, TaiSan, LichSuTT),
+> Django tự động lưu ID số nguyên vào cột FK thay vì lưu text —
+> có thể kiểm chứng bằng phpMyAdmin.
+# 4. Cấu trúc dự án Django Cầm Đồ
+
+```
+django-camdo/
+├── docker-compose.yml
+├── .env
+├── README.md
+└── django/
+    ├── Dockerfile
+    ├── requirements.txt
+    └── web/
+        ├── manage.py
+        ├── staticfiles/
+        ├── config/
+        │   ├── __init__.py
+        │   ├── asgi.py
+        │   ├── settings.py
+        │   ├── urls.py
+        │   └── wsgi.py
+        └── core/
+            ├── __init__.py
+            ├── admin.py
+            ├── apps.py
+            ├── models.py
+            ├── tests.py
+            ├── urls.py
+            ├── views.py
+            ├── migrations/
+            └── template/
+                └── home.html
+```
+# 5. Hướng dẫn cài đặt
 Chạy lần lượt từng lệnh:  
 Bước 1 — Tạo migration:  
 ```bash
@@ -125,9 +138,7 @@ http://192.168.126.131:8000/admin/ → trang quản trị
 <img width="950" height="434" alt="image" src="https://github.com/user-attachments/assets/9fbc4755-b0a5-434e-9afe-f65ab863ffb5" />
 
 <img width="943" height="472" alt="image" src="https://github.com/user-attachments/assets/03110193-0e9d-4261-93f9-840afb4a3f37" />
-
-
-
+  
 # Cloudflared
 Mở file:
 ```
